@@ -1,4 +1,5 @@
 #pragma once
+#include "result-helper.hpp"
 #include "result-type-constructor.hpp"
 #include <utility>
 #include <variant>
@@ -118,21 +119,16 @@ public:
     /////////////////////////////////////////////////////////////////////////
 
     // call fn `f` on `Ok` type if it exists, return Result<T, E> from `f(T)` or `Err(E)`
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, E &>>>
-    constexpr auto and_then(F &&f) &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, const E &>>>
-    constexpr auto and_then(F &&f) const &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, E>>> constexpr auto and_then(F &&f) &&;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, const E>>>
-    constexpr auto and_then(F &&f) const &&;
+    template <typename F> constexpr auto and_then(F &&f) & -> monadic_enable_t<E, F, E &, T &>;
+    template <typename F> constexpr auto and_then(F &&f) const & -> monadic_enable_t<E, F, const E &, const T &>;
+    template <typename F> constexpr auto and_then(F &&f) && -> monadic_enable_t<E, F, E, T &&>;
+    template <typename F> constexpr auto and_then(F &&f) const && -> monadic_enable_t<E, F, const E, const T &&>;
 
     // call fn `f` on `Err` type if it exists, return Result<T, E> from `f(E)` or `Ok(T)`
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<T, T &>>> constexpr auto or_else(F &&f) &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<T, const T &>>>
-    constexpr auto or_else(F &&f) const &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<T, T>>> constexpr auto or_else(F &&f) &&;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<T, const T>>>
-    constexpr auto or_else(F &&f) const &&;
+    template <typename F> constexpr auto or_else(F &&f) & -> monadic_enable_t<T, F, T &, E &>;
+    template <typename F> constexpr auto or_else(F &&f) const & -> monadic_enable_t<T, F, const T &, const E &>;
+    template <typename F> constexpr auto or_else(F &&f) && -> monadic_enable_t<T, F, T, E &&>;
+    template <typename F> constexpr auto or_else(F &&f) const && -> monadic_enable_t<T, F, const T, const E &&>;
 
     /////////////////////////////////////////////////////////////////////////
     // Transforming contained values
@@ -140,21 +136,17 @@ public:
 
     // Maps a `Result<T, E>` to `Result<U, E>` by applying a function `f(T) -> U` to a
     // contained [`Ok`] value, leaving an [`Err`] value untouched.
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, E &>>> constexpr auto map(F &&f) &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, const E &>>>
-    constexpr auto map(F &&f) const &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, E>>> constexpr auto map(F &&f) &&;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, const E>>>
-    constexpr auto map(F &&f) const &&;
+    template <typename F> constexpr auto map(F &&f) & -> transform_enable_t<E, F, E &, T &>;
+    template <typename F> constexpr auto map(F &&f) const & -> transform_enable_t<E, F, const E &, const T &>;
+    template <typename F> constexpr auto map(F &&f) && -> transform_enable_t<E, F, E, T>;
+    template <typename F> constexpr auto map(F &&f) const && -> transform_enable_t<E, F, const E, const T>;
 
     // Maps a `Result<T, E>` to `Result<T, G>` by applying a function `f(E) -> G` to a
     // contained [`Err`] value, leaving an [`Ok`] value untouched.
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<T, T &>>> constexpr auto map_err(F &&f) &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<T, const T &>>>
-    constexpr auto map_err(F &&f) const &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<T, T>>> constexpr auto map_err(F &&f) &&;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<T, const T>>>
-    constexpr auto map_err(F &&f) const &&;
+    template <typename F> constexpr auto map_err(F &&f) & -> transform_err_enable_t<T, F, T &, E &>;
+    template <typename F> constexpr auto map_err(F &&f) const & -> transform_err_enable_t<T, F, const T &, const E &>;
+    template <typename F> constexpr auto map_err(F &&f) && -> transform_err_enable_t<T, F, T, E &&>;
+    template <typename F> constexpr auto map_err(F &&f) const && -> transform_err_enable_t<T, F, const T, const E &&>;
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -249,19 +241,16 @@ public:
     /////////////////////////////////////////////////////////////////////////
 
     // call fn `f` on `Ok` type if it exists, return Result<T, E> from `f(T)` or `Err(E)`
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, E &>>>
-    constexpr auto and_then(F &&f) &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, const E &>>>
-    constexpr auto and_then(F &&f) const &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, E>>> constexpr auto and_then(F &&f) &&;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, const E>>>
-    constexpr auto and_then(F &&f) const &&;
+    template <typename F> constexpr auto and_then(F &&f) & -> monadic_no_arg_enable_t<E, F, E &>;
+    template <typename F> constexpr auto and_then(F &&f) const & -> monadic_no_arg_enable_t<E, F, const E &>;
+    template <typename F> constexpr auto and_then(F &&f) && -> monadic_no_arg_enable_t<E, F, E>;
+    template <typename F> constexpr auto and_then(F &&f) const && -> monadic_no_arg_enable_t<E, F, const E>;
 
     // call fn `f` on `Err` type if it exists, return Result<T, E> from `f(E)` or `Ok(T)`
-    template <typename F> constexpr auto or_else(F &&f) &;
-    template <typename F> constexpr auto or_else(F &&f) const &;
-    template <typename F> constexpr auto or_else(F &&f) &&;
-    template <typename F> constexpr auto or_else(F &&f) const &&;
+    template <typename F> constexpr auto or_else(F &&f) & -> fn_eval_result<F, E &>;
+    template <typename F> constexpr auto or_else(F &&f) const & -> fn_eval_result<F, const E &>;
+    template <typename F> constexpr auto or_else(F &&f) && -> fn_eval_result<F, E &&>;
+    template <typename F> constexpr auto or_else(F &&f) const && -> fn_eval_result<F, const E &&>;
 
     /////////////////////////////////////////////////////////////////////////
     // Transforming contained values
@@ -269,19 +258,17 @@ public:
 
     // Maps a `Result<T, E>` to `Result<U, E>` by applying a function `f(T) -> U` to a
     // contained [`Ok`] value, leaving an [`Err`] value untouched.
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, E &>>> constexpr auto map(F &&f) &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, const E &>>>
-    constexpr auto map(F &&f) const &;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, E>>> constexpr auto map(F &&f) &&;
-    template <typename F, typename = std::enable_if_t<std::is_constructible_v<E, const E>>>
-    constexpr auto map(F &&f) const &&;
+    template <typename F> constexpr auto map(F &&f) & -> transform_no_arg_enable_t<E, F, E &>;
+    template <typename F> constexpr auto map(F &&f) const & -> transform_no_arg_enable_t<E, F, const E &>;
+    template <typename F> constexpr auto map(F &&f) && -> transform_no_arg_enable_t<E, F, E>;
+    template <typename F> constexpr auto map(F &&f) const && -> transform_no_arg_enable_t<E, F, const E>;
 
     // Maps a `Result<T, E>` to `Result<T, G>` by applying a function `f(E) -> G` to a
     // contained [`Err`] value, leaving an [`Ok`] value untouched.
-    template <typename F> constexpr auto map_err(F &&f) &;
-    template <typename F> constexpr auto map_err(F &&f) const &;
-    template <typename F> constexpr auto map_err(F &&f) &&;
-    template <typename F> constexpr auto map_err(F &&f) const &&;
+    template <typename F> constexpr auto map_err(F &&f) & -> Result<void, fn_eval_result_xform<F, E &>>;
+    template <typename F> constexpr auto map_err(F &&f) const & -> Result<void, fn_eval_result_xform<F, const E &>>;
+    template <typename F> constexpr auto map_err(F &&f) && -> Result<void, fn_eval_result_xform<F, E &&>>;
+    template <typename F> constexpr auto map_err(F &&f) const && -> Result<void, fn_eval_result_xform<F, const E &&>>;
 };
 
 /// Basic usage:

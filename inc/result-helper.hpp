@@ -18,6 +18,21 @@ template <typename F, typename T> using fn_eval_result_xform = std::remove_cv_t<
 template <typename F> using fn_eval_result_no_arg            = remove_cvref_t<std::invoke_result_t<F &&>>;
 template <typename F> using fn_eval_result_xform_no_arg      = std::remove_cv_t<std::invoke_result_t<F &&>>;
 
+template <typename T, typename Fn, typename Tp, typename FnArg>
+using monadic_enable_t = std::enable_if_t<std::is_constructible_v<T, Tp>, fn_eval_result<Fn, FnArg>>;
+
+template <typename T, typename Fn, typename Tp>
+using monadic_no_arg_enable_t = std::enable_if_t<std::is_constructible_v<T, Tp>, fn_eval_result_no_arg<Fn>>;
+
+template <typename E, typename Fn, typename Ep, typename FnArg>
+using transform_enable_t = std::enable_if_t<std::is_constructible_v<E, Ep>, Result<fn_eval_result_xform<Fn, FnArg>, E>>;
+
+template <typename E, typename Fn, typename Ep>
+using transform_no_arg_enable_t = std::enable_if_t<std::is_constructible_v<E, Ep>, Result<fn_eval_result_xform_no_arg<Fn>, E>>;
+
+template <typename T, typename Fn, typename Tp, typename FnArg>
+using transform_err_enable_t = std::enable_if_t<std::is_constructible_v<T, Tp>, Result<T, fn_eval_result_xform<Fn, FnArg>>>;
+
 template <typename T>
 constexpr bool movable = std::is_object<T>::value && std::is_move_constructible<T>::value &&
                          std::is_assignable<T &, T>::value && std::is_swappable<T>::value;

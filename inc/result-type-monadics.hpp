@@ -1,7 +1,9 @@
 #include "result-helper.hpp"
 #include "result-type-definition.hpp"
 #include <functional>
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::and_then(F &&f) &
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::and_then(F &&f) & -> monadic_enable_t<E, F, E &, T &>
 {
     using U = fn_eval_result<F, T &>;
 
@@ -17,7 +19,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_err<typename U::value_type, typename U::error_type>(std::get<E>(result_variant_));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::and_then(F &&f) const &
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::and_then(F &&f) const & -> monadic_enable_t<E, F, const E &, const T &>
 {
     using U = fn_eval_result<F, const T &>;
 
@@ -33,7 +37,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_err<typename U::value_type, typename U::error_type>(std::get<E>(result_variant_));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::and_then(F &&f) &&
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::and_then(F &&f) && -> monadic_enable_t<E, F, E, T &&>
 {
     using U = fn_eval_result<F, T &&>;
 
@@ -49,7 +55,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_err<typename U::value_type, typename U::error_type>(std::get<E>(std::move(result_variant_)));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::and_then(F &&f) const &&
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::and_then(F &&f) const && -> monadic_enable_t<E, F, const E, const T &&>
 {
     using U = fn_eval_result<F, const T &&>;
 
@@ -66,7 +74,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
 }
 
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::or_else(F &&f) &
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::or_else(F &&f) & -> monadic_enable_t<T, F, T &, E &>
 {
     using G = fn_eval_result<F, E &>;
 
@@ -82,7 +92,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_ok<typename G::value_type, typename G::error_type>(std::get<T>(result_variant_));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::or_else(F &&f) const &
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::or_else(F &&f) const & -> monadic_enable_t<T, F, const T &, const E &>
 {
     using G = fn_eval_result<F, const E &>;
 
@@ -98,7 +110,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_ok<typename G::value_type, typename G::error_type>(std::get<T>(result_variant_));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::or_else(F &&f) &&
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::or_else(F &&f) && -> monadic_enable_t<T, F, T, E &&>
 {
     using G = fn_eval_result<F, E &&>;
 
@@ -114,7 +128,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_ok<typename G::value_type, typename G::error_type>(std::get<T>(std::move(result_variant_)));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::or_else(F &&f) const &&
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::or_else(F &&f) const && -> monadic_enable_t<T, F, const T, const E &&>
 {
     using G = fn_eval_result<F, const E &&>;
 
@@ -131,7 +147,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
 }
 
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map(F &&f) &
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::map(F &&f) & -> transform_enable_t<E, F, E &, T &>
 {
     using U = fn_eval_result_xform<F, T &>;
 
@@ -152,7 +170,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_err<U, E>(std::get<E>(result_variant_));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map(F &&f) const &
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::map(F &&f) const & -> transform_enable_t<E, F, const E &, const T &>
 {
     using U = fn_eval_result_xform<F, const T &>;
 
@@ -173,7 +193,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_err<U, E>(std::get<E>(result_variant_));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map(F &&f) &&
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::map(F &&f) && -> transform_enable_t<E, F, E, T>
 {
     using U = fn_eval_result_xform<F, T>;
 
@@ -194,7 +216,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_err<U, E>(std::get<E>(std::move(result_variant_)));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map(F &&f) const &&
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::map(F &&f) const && -> transform_enable_t<E, F, const E, const T>
 {
     using U = fn_eval_result_xform<F, const T>;
 
@@ -216,7 +240,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
 }
 
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map_err(F &&f) &
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::map_err(F &&f) & -> transform_err_enable_t<T, F, T &, E &>
 {
     using G = fn_eval_result_xform<F, E &>;
 
@@ -229,7 +255,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_ok<T, G>(std::get<T>(result_variant_));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map_err(F &&f) const &
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::map_err(F &&f) const & -> transform_err_enable_t<T, F, const T &, const E &>
 {
     using G = fn_eval_result_xform<F, const E &>;
 
@@ -242,7 +270,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_ok<T, G>(std::get<T>(result_variant_));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map_err(F &&f) &&
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::map_err(F &&f) && -> transform_err_enable_t<T, F, T, E &&>
 {
     using G = fn_eval_result_xform<F, E &&>;
 
@@ -255,7 +285,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
         return make_ok<T, G>(std::get<T>(std::move(result_variant_)));
     }
 }
-template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map_err(F &&f) const &&
+template <typename T, typename E>
+template <typename F>
+constexpr auto Result<T, E>::map_err(F &&f) const && -> transform_err_enable_t<T, F, const T, const E &&>
 {
     using G = fn_eval_result_xform<F, const E &&>;
 
@@ -273,7 +305,9 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
 // void specialization
 /////////////////////////////////////////////////////////////////////////
 
-template <typename E> template <typename F, typename> constexpr auto Result<void, E>::and_then(F &&f) &
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::and_then(F &&f) & -> monadic_no_arg_enable_t<E, F, E &>
 {
     using U = fn_eval_result_no_arg<F>;
 
@@ -289,7 +323,9 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
         return make_err<typename U::value_type, typename U::error_type>(std::get<E>(result_variant_));
     }
 }
-template <typename E> template <typename F, typename> constexpr auto Result<void, E>::and_then(F &&f) const &
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::and_then(F &&f) const & -> monadic_no_arg_enable_t<E, F, const E &>
 {
     using U = fn_eval_result_no_arg<F>;
 
@@ -305,7 +341,9 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
         return make_err<typename U::value_type, typename U::error_type>(std::get<E>(result_variant_));
     }
 }
-template <typename E> template <typename F, typename> constexpr auto Result<void, E>::and_then(F &&f) &&
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::and_then(F &&f) && -> monadic_no_arg_enable_t<E, F, E>
 {
     using U = fn_eval_result_no_arg<F>;
 
@@ -321,7 +359,9 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
         return make_err<typename U::value_type, typename U::error_type>(std::get<E>(std::move(result_variant_)));
     }
 }
-template <typename E> template <typename F, typename> constexpr auto Result<void, E>::and_then(F &&f) const &&
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::and_then(F &&f) const && -> monadic_no_arg_enable_t<E, F, const E>
 {
     using U = fn_eval_result_no_arg<F>;
 
@@ -338,7 +378,7 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
     }
 }
 
-template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) &
+template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) & -> fn_eval_result<F, E &>
 {
     using G = fn_eval_result<F, E &>;
 
@@ -354,7 +394,9 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::or_e
         return make_ok<void, typename G::error_type>();
     }
 }
-template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) const &
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::or_else(F &&f) const & -> fn_eval_result<F, const E &>
 {
     using G = fn_eval_result<F, const E &>;
 
@@ -370,7 +412,7 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::or_e
         return make_ok<void, typename G::error_type>();
     }
 }
-template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) &&
+template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) && -> fn_eval_result<F, E &&>
 {
     using G = fn_eval_result<F, E &&>;
 
@@ -386,7 +428,9 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::or_e
         return make_ok<void, typename G::error_type>();
     }
 }
-template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) const &&
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::or_else(F &&f) const && -> fn_eval_result<F, const E &&>
 {
     using G = fn_eval_result<F, const E &&>;
 
@@ -403,7 +447,9 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::or_e
     }
 }
 
-template <typename E> template <typename F, typename> constexpr auto Result<void, E>::map(F &&f) &
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::map(F &&f) & -> transform_no_arg_enable_t<E, F, E &>
 {
     using U = fn_eval_result_xform_no_arg<F>;
 
@@ -416,7 +462,9 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
         return make_err<U, E>(std::get<E>(result_variant_));
     }
 }
-template <typename E> template <typename F, typename> constexpr auto Result<void, E>::map(F &&f) const &
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::map(F &&f) const & -> transform_no_arg_enable_t<E, F, const E &>
 {
     using U = fn_eval_result_xform_no_arg<F>;
 
@@ -429,7 +477,9 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
         return make_err<U, E>(std::get<E>(result_variant_));
     }
 }
-template <typename E> template <typename F, typename> constexpr auto Result<void, E>::map(F &&f) &&
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::map(F &&f) && -> transform_no_arg_enable_t<E, F, E>
 {
     using U = fn_eval_result_xform_no_arg<F>;
 
@@ -442,7 +492,9 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
         return make_err<U, E>(std::get<E>(std::move(result_variant_)));
     }
 }
-template <typename E> template <typename F, typename> constexpr auto Result<void, E>::map(F &&f) const &&
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::map(F &&f) const && -> transform_no_arg_enable_t<E, F, const E>
 {
     using U = fn_eval_result_xform_no_arg<F>;
 
@@ -456,7 +508,9 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
     }
 }
 
-template <typename E> template <typename F> constexpr auto Result<void, E>::map_err(F &&f) &
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::map_err(F &&f) & -> Result<void, fn_eval_result_xform<F, E &>>
 {
     using G = fn_eval_result_xform<F, E &>;
 
@@ -469,7 +523,9 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::map_
         return make_ok<void, G>();
     }
 }
-template <typename E> template <typename F> constexpr auto Result<void, E>::map_err(F &&f) const &
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::map_err(F &&f) const & -> Result<void, fn_eval_result_xform<F, const E &>>
 {
     using G = fn_eval_result_xform<F, const E &>;
 
@@ -482,7 +538,9 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::map_
         return make_ok<void, G>();
     }
 }
-template <typename E> template <typename F> constexpr auto Result<void, E>::map_err(F &&f) &&
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::map_err(F &&f) && -> Result<void, fn_eval_result_xform<F, E &&>>
 {
     using G = fn_eval_result_xform<F, E &&>;
 
@@ -495,10 +553,11 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::map_
         return make_ok<void, G>();
     }
 }
-template <typename E> template <typename F> constexpr auto Result<void, E>::map_err(F &&f) const &&
+template <typename E>
+template <typename F>
+constexpr auto Result<void, E>::map_err(F &&f) const && -> Result<void, fn_eval_result_xform<F, const E &&>>
 {
-    using G   = fn_eval_result_xform<F, const E &&>;
-    using Res = Result<void, G>;
+    using G = fn_eval_result_xform<F, const E &&>;
 
     if (is_err())
     {
