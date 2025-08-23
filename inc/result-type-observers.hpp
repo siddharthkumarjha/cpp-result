@@ -59,6 +59,61 @@ template <typename T, typename E> template <typename F> constexpr bool Result<T,
     return false;
 }
 
+template <typename T, typename E>
+template <typename OkFn, typename ErrFn>
+constexpr auto Result<T, E>::match(OkFn &&ok_fn, ErrFn &&err_fn) & -> std::invoke_result_t<OkFn, T &>
+{
+    static_assert(std::is_invocable_v<OkFn, T &>);
+    static_assert(std::is_invocable_v<ErrFn, E &>);
+    using OkRes  = fn_eval_result<OkFn, T &>;
+    using ErrRes = fn_eval_result<ErrFn, E &>;
+    static_assert(std::is_convertible_v<OkRes, ErrRes>);
+    if (is_ok())
+    {
+        return std::invoke(std::forward<OkFn>(ok_fn), std::get<T>(result_variant_));
+    }
+    else
+    {
+        return std::invoke(std::forward<ErrFn>(err_fn), std::get<E>(result_variant_));
+    }
+}
+template <typename T, typename E>
+template <typename OkFn, typename ErrFn>
+constexpr auto Result<T, E>::match(OkFn &&ok_fn, ErrFn &&err_fn) const & -> std::invoke_result_t<OkFn, T const &>
+{
+    static_assert(std::is_invocable_v<OkFn, const T &>);
+    static_assert(std::is_invocable_v<ErrFn, const E &>);
+    using OkRes  = fn_eval_result<OkFn, const T &>;
+    using ErrRes = fn_eval_result<ErrFn, const E &>;
+    static_assert(std::is_convertible_v<OkRes, ErrRes>);
+    if (is_ok())
+    {
+        return std::invoke(std::forward<OkFn>(ok_fn), std::get<T>(result_variant_));
+    }
+    else
+    {
+        return std::invoke(std::forward<ErrFn>(err_fn), std::get<E>(result_variant_));
+    }
+}
+template <typename T, typename E>
+template <typename OkFn, typename ErrFn>
+constexpr auto Result<T, E>::match(OkFn &&ok_fn, ErrFn &&err_fn) && -> std::invoke_result_t<OkFn, T &&>
+{
+    static_assert(std::is_invocable_v<OkFn, T &&>);
+    static_assert(std::is_invocable_v<ErrFn, E &&>);
+    using OkRes  = fn_eval_result<OkFn, T &&>;
+    using ErrRes = fn_eval_result<ErrFn, E &&>;
+    static_assert(std::is_convertible_v<OkRes, ErrRes>);
+    if (is_ok())
+    {
+        return std::invoke(std::forward<OkFn>(ok_fn), std::get<T>(std::move(result_variant_)));
+    }
+    else
+    {
+        return std::invoke(std::forward<ErrFn>(err_fn), std::get<E>(std::move(result_variant_)));
+    }
+}
+
 template <typename T, typename E> constexpr T &Result<T, E>::unwrap() &
 {
     static_assert(std::is_copy_assignable_v<E>, "ill-formed");
@@ -209,6 +264,61 @@ template <typename E> template <typename F> constexpr bool Result<void, E>::is_e
         return std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_)));
     }
     return false;
+}
+
+template <typename E>
+template <typename OkFn, typename ErrFn>
+constexpr auto Result<void, E>::match(OkFn &&ok_fn, ErrFn &&err_fn) & -> std::invoke_result_t<OkFn>
+{
+    static_assert(std::is_invocable_v<OkFn>);
+    static_assert(std::is_invocable_v<ErrFn, E &>);
+    using OkRes  = fn_eval_result_no_arg<OkFn>;
+    using ErrRes = fn_eval_result<ErrFn, E &>;
+    static_assert(std::is_convertible_v<OkRes, ErrRes>);
+    if (is_ok())
+    {
+        return std::invoke(std::forward<OkFn>(ok_fn));
+    }
+    else
+    {
+        return std::invoke(std::forward<ErrFn>(err_fn), std::get<E>(result_variant_));
+    }
+}
+template <typename E>
+template <typename OkFn, typename ErrFn>
+constexpr auto Result<void, E>::match(OkFn &&ok_fn, ErrFn &&err_fn) const & -> std::invoke_result_t<OkFn>
+{
+    static_assert(std::is_invocable_v<OkFn>);
+    static_assert(std::is_invocable_v<ErrFn, const E &>);
+    using OkRes  = fn_eval_result_no_arg<OkFn>;
+    using ErrRes = fn_eval_result<ErrFn, const E &>;
+    static_assert(std::is_convertible_v<OkRes, ErrRes>);
+    if (is_ok())
+    {
+        return std::invoke(std::forward<OkFn>(ok_fn));
+    }
+    else
+    {
+        return std::invoke(std::forward<ErrFn>(err_fn), std::get<E>(result_variant_));
+    }
+}
+template <typename E>
+template <typename OkFn, typename ErrFn>
+constexpr auto Result<void, E>::match(OkFn &&ok_fn, ErrFn &&err_fn) && -> std::invoke_result_t<OkFn>
+{
+    static_assert(std::is_invocable_v<OkFn>);
+    static_assert(std::is_invocable_v<ErrFn, E &&>);
+    using OkRes  = fn_eval_result_no_arg<OkFn>;
+    using ErrRes = fn_eval_result<ErrFn, E &&>;
+    static_assert(std::is_convertible_v<OkRes, ErrRes>);
+    if (is_ok())
+    {
+        return std::invoke(std::forward<OkFn>(ok_fn));
+    }
+    else
+    {
+        return std::invoke(std::forward<ErrFn>(err_fn), std::get<E>(std::move(result_variant_)));
+    }
 }
 
 template <typename E> constexpr void Result<void, E>::unwrap() const &

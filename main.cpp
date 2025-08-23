@@ -1,14 +1,15 @@
 #include "inc/result.hpp"
 #include <iostream>
 
-using DivisionResult = Result<int, std::string>;
+using namespace std::literals;
+using DivisionResult = Result<int, std::string_view>;
 
 DivisionResult Divide(int a, int b)
 {
     if (b == 0)
-        return DivisionResult::Err("division by 0 detected");
+        return Err("division by 0"sv);
 
-    return DivisionResult::Ok(a / b);
+    return Ok(a / b);
 }
 
 int main(int argc, char *argv[])
@@ -21,10 +22,10 @@ int main(int argc, char *argv[])
                                     return Divide(a, 0);
                                 })
                             .or_else(
-                                [](std::string const &e) -> DivisionResult
+                                [](std::string_view e) -> DivisionResult
                                 {
                                     std::cout << "got err: " << e << '\n';
-                                    return DivisionResult::Ok(0);
+                                    return Ok(0);
                                 })
                             .and_then(
                                 [](int a) -> DivisionResult
@@ -38,7 +39,18 @@ int main(int argc, char *argv[])
                                     std::cout << "finally got value: " << res << '\n';
                                     return true;
                                 });
-
     std::cout << "result: " << std::boolalpha << result << '\n';
+
+    std::cout << "\n=====================================================\n";
+
+    Divide(8, 0).match([](int a) -> void { std::cout << "got result: " << a << '\n'; },
+                       [](std::string_view e) -> void { std::cout << "got err: " << e << '\n'; });
+
+    std::cout << "\n=====================================================\n";
+
+    auto e = make_ok<void, std::string>();
+    e.match([]() -> void { std::cout << "got void result\n"; },
+            [](std::string &e) -> void { std::cout << "got err: " << e << '\n'; });
+
     return 0;
 }

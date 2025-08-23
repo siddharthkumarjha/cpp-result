@@ -14,7 +14,7 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
     else
     {
-        return U::Err(std::get<E>(result_variant_));
+        return make_err<typename U::value_type, typename U::error_type>(std::get<E>(result_variant_));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::and_then(F &&f) const &
@@ -30,7 +30,7 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
     else
     {
-        return U::Err(std::get<E>(result_variant_));
+        return make_err<typename U::value_type, typename U::error_type>(std::get<E>(result_variant_));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::and_then(F &&f) &&
@@ -46,7 +46,7 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
     else
     {
-        return U::Err(std::get<E>(std::move(result_variant_)));
+        return make_err<typename U::value_type, typename U::error_type>(std::get<E>(std::move(result_variant_)));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::and_then(F &&f) const &&
@@ -62,7 +62,7 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
     else
     {
-        return U::Err(std::get<E>(std::move(result_variant_)));
+        return make_err<typename U::value_type, typename U::error_type>(std::get<E>(std::move(result_variant_)));
     }
 }
 
@@ -79,7 +79,7 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
     else
     {
-        return G::Ok(std::get<T>(result_variant_));
+        return make_ok<typename G::value_type, typename G::error_type>(std::get<T>(result_variant_));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::or_else(F &&f) const &
@@ -95,7 +95,7 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
     else
     {
-        return G::Ok(std::get<T>(result_variant_));
+        return make_ok<typename G::value_type, typename G::error_type>(std::get<T>(result_variant_));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::or_else(F &&f) &&
@@ -111,7 +111,7 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
     else
     {
-        return G::Ok(std::get<T>(std::move(result_variant_)));
+        return make_ok<typename G::value_type, typename G::error_type>(std::get<T>(std::move(result_variant_)));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::or_else(F &&f) const &&
@@ -127,153 +127,145 @@ template <typename T, typename E> template <typename F, typename> constexpr auto
     }
     else
     {
-        return G::Ok(std::get<T>(std::move(result_variant_)));
+        return make_ok<typename G::value_type, typename G::error_type>(std::get<T>(std::move(result_variant_)));
     }
 }
 
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map(F &&f) &
 {
-    using U   = fn_eval_result_xform<F, T &>;
-    using Res = Result<U, E>;
+    using U = fn_eval_result_xform<F, T &>;
 
     if (is_ok())
     {
         if constexpr (std::is_void_v<U>)
         {
             std::invoke(std::forward<F>(f), std::get<T>(result_variant_));
-            return Res::Ok();
+            return make_ok<void, E>();
         }
         else
         {
-            return Res::Ok(std::invoke(std::forward<F>(f), std::get<T>(result_variant_)));
+            return make_ok<U, E>(std::invoke(std::forward<F>(f), std::get<T>(result_variant_)));
         }
     }
     else
     {
-        return Res::Err(std::get<E>(result_variant_));
+        return make_err<U, E>(std::get<E>(result_variant_));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map(F &&f) const &
 {
-    using U   = fn_eval_result_xform<F, const T &>;
-    using Res = Result<U, E>;
+    using U = fn_eval_result_xform<F, const T &>;
 
     if (is_ok())
     {
         if constexpr (std::is_void_v<U>)
         {
             std::invoke(std::forward<F>(f), std::get<T>(result_variant_));
-            return Res::Ok();
+            return make_ok<void, E>();
         }
         else
         {
-            return Res::Ok(std::invoke(std::forward<F>(f), std::get<T>(result_variant_)));
+            return make_ok<U, E>(std::invoke(std::forward<F>(f), std::get<T>(result_variant_)));
         }
     }
     else
     {
-        return Res::Err(std::get<E>(result_variant_));
+        return make_err<U, E>(std::get<E>(result_variant_));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map(F &&f) &&
 {
-    using U   = fn_eval_result_xform<F, T>;
-    using Res = Result<U, E>;
+    using U = fn_eval_result_xform<F, T>;
 
     if (is_ok())
     {
         if constexpr (std::is_void_v<U>)
         {
             std::invoke(std::forward<F>(f), std::get<T>(std::move(result_variant_)));
-            return Res::Ok();
+            return make_ok<void, E>();
         }
         else
         {
-            return Res::Ok(std::invoke(std::forward<F>(f), std::get<T>(std::move(result_variant_))));
+            return make_ok<U, E>(std::invoke(std::forward<F>(f), std::get<T>(std::move(result_variant_))));
         }
     }
     else
     {
-        return Res::Err(std::get<E>(std::move(result_variant_)));
+        return make_err<U, E>(std::get<E>(std::move(result_variant_)));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map(F &&f) const &&
 {
-    using U   = fn_eval_result_xform<F, const T>;
-    using Res = Result<U, E>;
+    using U = fn_eval_result_xform<F, const T>;
 
     if (is_ok())
     {
         if constexpr (std::is_void_v<U>)
         {
             std::invoke(std::forward<F>(f), std::get<T>(std::move(result_variant_)));
-            return Res::Ok();
+            return make_ok<void, E>();
         }
         else
         {
-            return Res::Ok(std::invoke(std::forward<F>(f), std::get<T>(std::move(result_variant_))));
+            return make_ok<U, E>(std::invoke(std::forward<F>(f), std::get<T>(std::move(result_variant_))));
         }
     }
     else
     {
-        return Res::Err(std::get<E>(std::move(result_variant_)));
+        return make_err<U, E>(std::get<E>(std::move(result_variant_)));
     }
 }
 
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map_err(F &&f) &
 {
-    using G   = fn_eval_result_xform<F, E &>;
-    using Res = Result<T, G>;
+    using G = fn_eval_result_xform<F, E &>;
 
     if (is_err())
     {
-        return Res::Err(std::invoke(std::forward<F>(f), std::get<E>(result_variant_)));
+        return make_err<T, G>(std::invoke(std::forward<F>(f), std::get<E>(result_variant_)));
     }
     else
     {
-        return Res::Ok(std::get<T>(result_variant_));
+        return make_ok<T, G>(std::get<T>(result_variant_));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map_err(F &&f) const &
 {
-    using G   = fn_eval_result_xform<F, const E &>;
-    using Res = Result<T, G>;
+    using G = fn_eval_result_xform<F, const E &>;
 
     if (is_err())
     {
-        return Res::Err(std::invoke(std::forward<F>(f), std::get<E>(result_variant_)));
+        return make_err<T, G>(std::invoke(std::forward<F>(f), std::get<E>(result_variant_)));
     }
     else
     {
-        return Res::Ok(std::get<T>(result_variant_));
+        return make_ok<T, G>(std::get<T>(result_variant_));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map_err(F &&f) &&
 {
-    using G   = fn_eval_result_xform<F, E &&>;
-    using Res = Result<T, G>;
+    using G = fn_eval_result_xform<F, E &&>;
 
     if (is_err())
     {
-        return Res::Err(std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_))));
+        return make_err<T, G>(std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_))));
     }
     else
     {
-        return Res::Ok(std::get<T>(std::move(result_variant_)));
+        return make_ok<T, G>(std::get<T>(std::move(result_variant_)));
     }
 }
 template <typename T, typename E> template <typename F, typename> constexpr auto Result<T, E>::map_err(F &&f) const &&
 {
-    using G   = fn_eval_result_xform<F, const E &&>;
-    using Res = Result<T, G>;
+    using G = fn_eval_result_xform<F, const E &&>;
 
     if (is_err())
     {
-        return Res::Err(std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_))));
+        return make_err<T, G>(std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_))));
     }
     else
     {
-        return Res::Ok(std::get<T>(std::move(result_variant_)));
+        return make_ok<T, G>(std::get<T>(std::move(result_variant_)));
     }
 }
 
@@ -294,7 +286,7 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
     }
     else
     {
-        return U::Err(std::get<E>(result_variant_));
+        return make_err<typename U::value_type, typename U::error_type>(std::get<E>(result_variant_));
     }
 }
 template <typename E> template <typename F, typename> constexpr auto Result<void, E>::and_then(F &&f) const &
@@ -310,7 +302,7 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
     }
     else
     {
-        return U::Err(std::get<E>(result_variant_));
+        return make_err<typename U::value_type, typename U::error_type>(std::get<E>(result_variant_));
     }
 }
 template <typename E> template <typename F, typename> constexpr auto Result<void, E>::and_then(F &&f) &&
@@ -326,7 +318,7 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
     }
     else
     {
-        return U::Err(std::get<E>(std::move(result_variant_)));
+        return make_err<typename U::value_type, typename U::error_type>(std::get<E>(std::move(result_variant_)));
     }
 }
 template <typename E> template <typename F, typename> constexpr auto Result<void, E>::and_then(F &&f) const &&
@@ -342,7 +334,7 @@ template <typename E> template <typename F, typename> constexpr auto Result<void
     }
     else
     {
-        return U::Err(std::get<E>(std::move(result_variant_)));
+        return make_err<typename U::value_type, typename U::error_type>(std::get<E>(std::move(result_variant_)));
     }
 }
 
@@ -359,7 +351,7 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::or_e
     }
     else
     {
-        return G::Ok();
+        return make_ok<void, typename G::error_type>();
     }
 }
 template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) const &
@@ -375,7 +367,7 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::or_e
     }
     else
     {
-        return G::Ok();
+        return make_ok<void, typename G::error_type>();
     }
 }
 template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) &&
@@ -391,7 +383,7 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::or_e
     }
     else
     {
-        return G::Ok();
+        return make_ok<void, typename G::error_type>();
     }
 }
 template <typename E> template <typename F> constexpr auto Result<void, E>::or_else(F &&f) const &&
@@ -407,107 +399,100 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::or_e
     }
     else
     {
-        return G::Ok();
+        return make_ok<void, typename G::error_type>();
     }
 }
 
 template <typename E> template <typename F, typename> constexpr auto Result<void, E>::map(F &&f) &
 {
-    using U   = fn_eval_result_xform_no_arg<F>;
-    using Res = Result<U, E>;
+    using U = fn_eval_result_xform_no_arg<F>;
 
     if (is_ok())
     {
-        return Res::Ok(std::invoke(std::forward<F>(f)));
+        return make_ok<U, E>(std::invoke(std::forward<F>(f)));
     }
     else
     {
-        return Res::Err(std::get<E>(result_variant_));
+        return make_err<U, E>(std::get<E>(result_variant_));
     }
 }
 template <typename E> template <typename F, typename> constexpr auto Result<void, E>::map(F &&f) const &
 {
-    using U   = fn_eval_result_xform_no_arg<F>;
-    using Res = Result<U, E>;
+    using U = fn_eval_result_xform_no_arg<F>;
 
     if (is_ok())
     {
-        return Res::Ok(std::invoke(std::forward<F>(f)));
+        return make_ok<U, E>(std::invoke(std::forward<F>(f)));
     }
     else
     {
-        return Res::Err(std::get<E>(result_variant_));
+        return make_err<U, E>(std::get<E>(result_variant_));
     }
 }
 template <typename E> template <typename F, typename> constexpr auto Result<void, E>::map(F &&f) &&
 {
-    using U   = fn_eval_result_xform_no_arg<F>;
-    using Res = Result<U, E>;
+    using U = fn_eval_result_xform_no_arg<F>;
 
     if (is_ok())
     {
-        return Res::Ok(std::invoke(std::forward<F>(f)));
+        return make_ok<U, E>(std::invoke(std::forward<F>(f)));
     }
     else
     {
-        return Res::Err(std::get<E>(std::move(result_variant_)));
+        return make_err<U, E>(std::get<E>(std::move(result_variant_)));
     }
 }
 template <typename E> template <typename F, typename> constexpr auto Result<void, E>::map(F &&f) const &&
 {
-    using U   = fn_eval_result_xform_no_arg<F>;
-    using Res = Result<U, E>;
+    using U = fn_eval_result_xform_no_arg<F>;
 
     if (is_ok())
     {
-        return Res::Ok(std::invoke(std::forward<F>(f)));
+        return make_ok<U, E>(std::invoke(std::forward<F>(f)));
     }
     else
     {
-        return Res::Err(std::get<E>(std::move(result_variant_)));
+        return make_err<U, E>(std::get<E>(std::move(result_variant_)));
     }
 }
 
 template <typename E> template <typename F> constexpr auto Result<void, E>::map_err(F &&f) &
 {
-    using G   = fn_eval_result_xform<F, E &>;
-    using Res = Result<void, G>;
+    using G = fn_eval_result_xform<F, E &>;
 
     if (is_err())
     {
-        return Res::Err(std::invoke(std::forward<F>(f), std::get<E>(result_variant_)));
+        return make_err<void, G>(std::invoke(std::forward<F>(f), std::get<E>(result_variant_)));
     }
     else
     {
-        return Res::Ok();
+        return make_ok<void, G>();
     }
 }
 template <typename E> template <typename F> constexpr auto Result<void, E>::map_err(F &&f) const &
 {
-    using G   = fn_eval_result_xform<F, const E &>;
-    using Res = Result<void, G>;
+    using G = fn_eval_result_xform<F, const E &>;
 
     if (is_err())
     {
-        return Res::Err(std::invoke(std::forward<F>(f), std::get<E>(result_variant_)));
+        return make_err<void, G>(std::invoke(std::forward<F>(f), std::get<E>(result_variant_)));
     }
     else
     {
-        return Res::Ok();
+        return make_ok<void, G>();
     }
 }
 template <typename E> template <typename F> constexpr auto Result<void, E>::map_err(F &&f) &&
 {
-    using G   = fn_eval_result_xform<F, E &&>;
-    using Res = Result<void, G>;
+    using G = fn_eval_result_xform<F, E &&>;
 
     if (is_err())
     {
-        return Res::Err(std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_))));
+        return make_err<void, G>(std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_))));
     }
     else
     {
-        return Res::Ok();
+        return make_ok<void, G>();
     }
 }
 template <typename E> template <typename F> constexpr auto Result<void, E>::map_err(F &&f) const &&
@@ -517,10 +502,10 @@ template <typename E> template <typename F> constexpr auto Result<void, E>::map_
 
     if (is_err())
     {
-        return Res::Err(std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_))));
+        return make_err<void, G>(std::invoke(std::forward<F>(f), std::get<E>(std::move(result_variant_))));
     }
     else
     {
-        return Res::Ok();
+        return make_ok<void, G>();
     }
 }
