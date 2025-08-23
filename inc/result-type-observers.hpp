@@ -70,7 +70,7 @@ namespace result_type
         static_assert(std::is_invocable_v<ErrFn, E &>);
         using OkRes  = helper::fn_eval_result<OkFn, T &>;
         using ErrRes = helper::fn_eval_result<ErrFn, E &>;
-        static_assert(std::is_convertible_v<OkRes, ErrRes>);
+        static_assert(std::is_convertible_v<ErrRes, OkRes>);
         if (is_ok())
         {
             return std::invoke(std::forward<OkFn>(ok_fn), std::get<detail::ResultKind::Ok>(result_variant_));
@@ -88,7 +88,7 @@ namespace result_type
         static_assert(std::is_invocable_v<ErrFn, const E &>);
         using OkRes  = helper::fn_eval_result<OkFn, const T &>;
         using ErrRes = helper::fn_eval_result<ErrFn, const E &>;
-        static_assert(std::is_convertible_v<OkRes, ErrRes>);
+        static_assert(std::is_convertible_v<ErrRes, OkRes>);
         if (is_ok())
         {
             return std::invoke(std::forward<OkFn>(ok_fn), std::get<detail::ResultKind::Ok>(result_variant_));
@@ -106,7 +106,7 @@ namespace result_type
         static_assert(std::is_invocable_v<ErrFn, E &&>);
         using OkRes  = helper::fn_eval_result<OkFn, T &&>;
         using ErrRes = helper::fn_eval_result<ErrFn, E &&>;
-        static_assert(std::is_convertible_v<OkRes, ErrRes>);
+        static_assert(std::is_convertible_v<ErrRes, OkRes>);
         if (is_ok())
         {
             return std::invoke(std::forward<OkFn>(ok_fn), std::get<detail::ResultKind::Ok>(std::move(result_variant_)));
@@ -288,7 +288,7 @@ namespace result_type
         static_assert(std::is_invocable_v<ErrFn, E &>);
         using OkRes  = helper::fn_eval_result_no_arg<OkFn>;
         using ErrRes = helper::fn_eval_result<ErrFn, E &>;
-        static_assert(std::is_convertible_v<OkRes, ErrRes>);
+        static_assert(std::is_convertible_v<ErrRes, OkRes>);
         if (is_ok())
         {
             return std::invoke(std::forward<OkFn>(ok_fn));
@@ -306,7 +306,7 @@ namespace result_type
         static_assert(std::is_invocable_v<ErrFn, const E &>);
         using OkRes  = helper::fn_eval_result_no_arg<OkFn>;
         using ErrRes = helper::fn_eval_result<ErrFn, const E &>;
-        static_assert(std::is_convertible_v<OkRes, ErrRes>);
+        static_assert(std::is_convertible_v<ErrRes, OkRes>);
         if (is_ok())
         {
             return std::invoke(std::forward<OkFn>(ok_fn));
@@ -324,7 +324,7 @@ namespace result_type
         static_assert(std::is_invocable_v<ErrFn, E &&>);
         using OkRes  = helper::fn_eval_result_no_arg<OkFn>;
         using ErrRes = helper::fn_eval_result<ErrFn, E &&>;
-        static_assert(std::is_convertible_v<OkRes, ErrRes>);
+        static_assert(std::is_convertible_v<ErrRes, OkRes>);
         if (is_ok())
         {
             return std::invoke(std::forward<OkFn>(ok_fn));
