@@ -3,6 +3,7 @@
 #include <memory>
 
 using namespace std::literals;
+using namespace result_type;
 using DivisionResult = Result<int, std::string_view>;
 
 DivisionResult Divide(int a, int b)
@@ -66,5 +67,19 @@ int main(int argc, char *argv[])
                                                   return -1;
                                               });
     std::cout << "ptr_val: " << ptr_deref << '\n';
+
+    std::cout << "\n=====================================================\n";
+    Result<std::string, std::string> e_tag = Ok("Hi!"s);
+    auto new_res                           = e_tag.map(
+        [](std::string_view ok_val)
+        {
+            std::cout << "map: " << ok_val << '\n';
+            return 42;
+        });
+    e_tag.match([](std::string_view const ok_msg) -> void { std::cout << "e_tag ok: " << ok_msg << '\n'; },
+                [](std::string_view const err_msg) -> void { std::cout << "e_tag err: " << err_msg << '\n'; });
+    new_res.match([](auto int_val) -> void { std::cout << "new res: " << int_val << '\n'; },
+                  [](auto e_msg) -> void { std::cout << "new res: " << e_msg << '\n'; });
+
     return 0;
 }
