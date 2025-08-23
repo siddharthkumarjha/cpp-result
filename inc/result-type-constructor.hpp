@@ -17,7 +17,7 @@ namespace result_type
         T value_;
     };
 
-    template <typename E> struct [[nodiscard]] Err : helper::check_value_type<E>
+    template <typename E> struct [[nodiscard]] Err : helper::check_error_type<E>
     {
         using value_type = E;
 

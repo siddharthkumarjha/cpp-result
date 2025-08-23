@@ -1,3 +1,4 @@
+#pragma once
 #include "result-helper.hpp"
 #include "result-type-definition.hpp"
 #include <functional>

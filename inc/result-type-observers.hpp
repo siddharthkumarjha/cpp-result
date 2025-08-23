@@ -1,3 +1,4 @@
+#pragma once
 #include "panic.hpp"
 #include "result-helper.hpp"
 #include "result-type-definition.hpp"
