@@ -179,7 +179,7 @@ namespace result_type
 
     public:
         // constructors of result type
-        constexpr Result(Ok<void> &&ok) : result_variant_{std::in_place_index<detail::ResultKind::Ok>, std::monostate{}}
+        constexpr Result(Ok<void> &&) : result_variant_{std::in_place_index<detail::ResultKind::Ok>, std::monostate{}}
         {
         }
         constexpr Result(Err<E> &&err)
@@ -187,7 +187,7 @@ namespace result_type
         {
         }
 
-        constexpr Result &operator=(Ok<void> &&other)
+        constexpr Result &operator=(Ok<void> &&)
         {
             result_variant_.template emplace<detail::ResultKind::Ok>(std::monostate{});
             return *this;
