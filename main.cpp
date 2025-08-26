@@ -18,6 +18,15 @@ using PtrRes = Result<std::unique_ptr<int>, std::string_view>;
 
 PtrRes make_some_memory() { return Ok(std::make_unique<int>(2)); }
 
+Result<void, std::string_view> foo()
+{
+    int res = TRY_OK(Divide(8, 4));
+    std::cout << "foo: divide was a success: " << res << '\n';
+    int div = TRY_OK(Divide(8, 0));
+    std::cout << "foo: divide was a success: " << div << '\n';
+    return Ok();
+}
+
 int main(int argc, char *argv[])
 {
     const auto result = Divide(8, 3)
@@ -81,5 +90,8 @@ int main(int argc, char *argv[])
     new_res.match([](auto int_val) -> void { std::cout << "new res: " << int_val << '\n'; },
                   [](auto e_msg) -> void { std::cout << "new res: " << e_msg << '\n'; });
 
+    std::cout << "\n=========================foo==========================\n";
+    foo().match([]() -> void { std::cout << "got void result\n"; },
+                [](std::string_view e) -> void { std::cout << "got err: " << e << '\n'; });
     return 0;
 }

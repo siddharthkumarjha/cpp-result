@@ -41,4 +41,6 @@ namespace result_type
         template <typename Tp, typename Er> friend class Result;
         explicit constexpr Ok() = default;
     };
+    template <typename = void> Ok() -> Ok<void>;
+    template <typename T> Ok(T) -> Ok<T>;
 } // namespace result_type
