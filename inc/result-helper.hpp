@@ -1,4 +1,5 @@
 #pragma once
+#include <sstream>
 #include <type_traits>
 
 namespace result_type
@@ -46,6 +47,19 @@ namespace result_type::helper
     constexpr bool movable = std::is_object<T>::value && std::is_move_constructible<T>::value &&
                              std::is_assignable<T &, T>::value && std::is_swappable<T>::value;
 
+    // Primary template (false case)
+    template <typename T, typename = void> struct is_streamable : std::false_type
+    {
+    };
+
+    // Specialization using SFINAE
+    template <typename T>
+    struct is_streamable<T, std::void_t<decltype(std::declval<std::ostream &>() << std::declval<T>())>> : std::true_type
+    {
+    };
+
+    template <typename T> constexpr bool is_streamable_v = is_streamable<T>::value;
+
     template <typename T> struct check_value_type
     {
         static_assert(movable<T>, "Value type `T` for `Result`, `Ok` and `Err` must be movable");
@@ -53,6 +67,8 @@ namespace result_type::helper
                       "Cannot use a reference for value type `T` for `Result`, `Ok` and `Err`, To "
                       "prevent subtleties use type wrappers like std::reference_wrapper instead");
         static_assert(std::is_nothrow_move_constructible_v<T>, "T must be nothrow move constructible");
+        static_assert(is_streamable_v<T>,
+                      "`T` must have a `operator<<` overload to satisfy debug traits of `Panic` handler");
     };
 
     template <typename E> struct check_error_type
@@ -62,5 +78,7 @@ namespace result_type::helper
                       "Cannot use a reference for value type `E` for `Result`, `Ok` and `Err`, To "
                       "prevent subtleties use type wrappers like std::reference_wrapper instead");
         static_assert(std::is_nothrow_move_constructible_v<E>, "E must be nothrow move constructible");
+        static_assert(is_streamable_v<E>,
+                      "`E` must have a `operator<<` overload to satisfy debug traits of `Panic` handler");
     };
 } // namespace result_type::helper
