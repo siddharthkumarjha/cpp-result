@@ -1,4 +1,4 @@
-#include "inc/result.hpp"
+#include "result/result.hpp"
 #include <chrono>
 #include <iostream>
 #include <random>
